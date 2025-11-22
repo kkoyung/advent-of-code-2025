@@ -1,0 +1,3 @@
+/target
+/input/*
+!/input/day00.txt
