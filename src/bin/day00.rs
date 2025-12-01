@@ -5,20 +5,20 @@ fn parse(input: &str) -> &str {
     input
 }
 
-fn part1(input: &str) -> u32 {
+fn part1(input: &str) -> usize {
     let input = parse(input);
 
     // ----- START WORKING HERE -----
     // Return number of bytes
-    input.len() as u32
+    input.len()
 }
 
-fn part2(input: &str) -> u32 {
+fn part2(input: &str) -> usize {
     let input = parse(input);
 
     // ----- START WORKING HERE -----
     // Return number of characters
-    input.chars().count() as u32
+    input.chars().count()
 }
 
 // =====================================================================
