@@ -29,6 +29,14 @@ $ just run 00 2
 
 ```
 
+There is another command to quickly create a file in `src/bin` for a new
+day, using `day00` as template.
+
+```bash
+# Example: Create src/bin/day05.rs
+$ just new 05
+```
+
 If you find that the code doesn't work, or you'd like to discuss the
 code with me, feel free to open an issue in this GitHub repository or
 email me (mailto:kingsley@kkoyung.dev).
