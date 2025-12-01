@@ -36,17 +36,19 @@ fn main() {
 mod tests {
     use super::{part1, part2};
 
+    const SHARED_INPUT: &str = r#"
+Hello👋🏻, World🌏
+"#;
+
     #[test]
     fn test_part1_example() {
-        let input = "Hello👋🏻, World🌏";
         let output = 24;
-        assert_eq!(part1(input), output);
+        assert_eq!(part1(SHARED_INPUT.trim()), output);
     }
 
     #[test]
     fn test_part2_example() {
-        let input = "Hello👋🏻, World🌏";
         let output = 15;
-        assert_eq!(part2(input), output);
+        assert_eq!(part2(SHARED_INPUT.trim()), output);
     }
 }
