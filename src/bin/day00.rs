@@ -1,12 +1,14 @@
 use std::{env, fs};
 
 fn parse(input: &str) -> &str {
+    // ----- START WORKING HERE -----
     input
 }
 
 fn part1(input: &str) -> u32 {
     let input = parse(input);
 
+    // ----- START WORKING HERE -----
     // Return number of bytes
     input.len() as u32
 }
@@ -14,6 +16,7 @@ fn part1(input: &str) -> u32 {
 fn part2(input: &str) -> u32 {
     let input = parse(input);
 
+    // ----- START WORKING HERE -----
     // Return number of characters
     input.chars().count() as u32
 }
