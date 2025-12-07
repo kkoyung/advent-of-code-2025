@@ -1,103 +1,109 @@
-use std::{env, fs};
+use std::{env, fs, ops};
 
-type Map = Vec<Vec<char>>;
-
-fn parse(input: &str) -> Map {
-    input.lines().map(|line| line.chars().collect()).collect()
+#[derive(Clone, Copy)]
+enum Position {
+    Space,
+    Splitter,
+    Beam(u64),
 }
 
-fn part1(input: &str) -> usize {
-    let mut map = parse(input);
-    let width = map.first().unwrap().len();
+type Map = Vec<Vec<Position>>;
 
-    let mut total_split = 0;
+fn parse(input: &str) -> Map {
+    input
+        .lines()
+        .map(|line| {
+            line.chars()
+                .map(|c| match c {
+                    '.' => Position::Space,
+                    '^' => Position::Splitter,
+                    'S' => Position::Beam(1),
+                    _ => panic!(),
+                })
+                .collect()
+        })
+        .collect()
+}
 
-    for cell in map.get_mut(0).unwrap() {
-        if *cell == 'S' {
-            *cell = '|';
+impl Position {
+    fn is_splitter(&self) -> bool {
+        match self {
+            Position::Space => false,
+            Position::Splitter => true,
+            Position::Beam(_) => false,
         }
     }
 
-    let mut last_row = map.first().unwrap().clone();
-    for row in map.iter_mut().skip(1) {
-        for (position, cell) in last_row.iter().enumerate() {
-            if *cell == '|' {
-                if row[position] == '.' {
-                    row[position] = '|';
+    fn is_beam(&self) -> bool {
+        match self {
+            Position::Space => false,
+            Position::Splitter => false,
+            Position::Beam(_) => true,
+        }
+    }
+}
+
+impl ops::Add<Position> for Position {
+    type Output = Position;
+
+    fn add(self, rhs: Position) -> Self::Output {
+        match (self, rhs) {
+            (Position::Space, Position::Space) => Position::Space,
+            (Position::Space, Position::Splitter) => Position::Space,
+            (Position::Space, Position::Beam(rhs)) => Position::Beam(rhs),
+            (Position::Splitter, Position::Space) => Position::Splitter,
+            (Position::Splitter, Position::Splitter) => Position::Splitter,
+            (Position::Splitter, Position::Beam(_)) => Position::Splitter,
+            (Position::Beam(lhs), Position::Space) => Position::Beam(lhs),
+            (Position::Beam(lhs), Position::Splitter) => Position::Beam(lhs),
+            (Position::Beam(lhs), Position::Beam(rhs)) => Position::Beam(lhs + rhs),
+        }
+    }
+}
+
+fn emit(map: &mut Map) -> u64 {
+    let height = map.len();
+    let width = map.first().unwrap().len();
+
+    let mut total_split = 0;
+    for i in 0..height - 1 {
+        for j in 0..width {
+            if !map[i][j].is_beam() {
+                continue;
+            }
+            map[i + 1][j] = map[i + 1][j] + map[i][j];
+            if map[i + 1][j].is_splitter() {
+                total_split += 1;
+                if j > 0 {
+                    map[i + 1][j - 1] = map[i + 1][j - 1] + map[i][j];
                 }
-                if row[position] == '^' {
-                    total_split += 1;
-                    if position > 0 {
-                        row[position - 1] = '|';
-                    }
-                    if position < width - 1 {
-                        row[position + 1] = '|';
-                    }
+                if j < width - 1 {
+                    map[i + 1][j + 1] = map[i + 1][j + 1] + map[i][j];
                 }
             }
         }
-        last_row = row.clone();
     }
 
     total_split
 }
 
+fn part1(input: &str) -> u64 {
+    let mut map = parse(input);
+    emit(&mut map)
+}
+
 fn part2(input: &str) -> u64 {
     let mut map = parse(input);
-    // let height = map.len();
-    let width = map.first().unwrap().len();
-
-    for cell in map.get_mut(0).unwrap() {
-        if *cell == 'S' {
-            *cell = '|';
-        }
-    }
-
-    let mut last_row = map.first().unwrap().clone();
-    for row in map.iter_mut().skip(1) {
-        for (position, cell) in last_row.iter().enumerate() {
-            if *cell == '|' {
-                if row[position] == '.' {
-                    row[position] = '|';
-                }
-                if row[position] == '^' {
-                    if position > 0 {
-                        row[position - 1] = '|';
-                    }
-                    if position < width - 1 {
-                        row[position + 1] = '|';
-                    }
-                }
-            }
-        }
-        last_row = row.clone();
-    }
-
-    let mut timeline = vec![0u64; width];
-    timeline[map
-        .first()
+    emit(&mut map);
+    map.last()
         .unwrap()
         .iter()
-        .position(|cell| *cell == '|')
-        .unwrap()] = 1;
-
-    for row_pair in map.windows(2) {
-        let mut new_timeline = vec![0u64; width];
-        for j in 0..width {
-            if row_pair[0][j] == '|' {
-                new_timeline[j] = timeline[j];
-            }
-            if j > 0 && row_pair[1][j-1] == '^' {
-                new_timeline[j] += timeline[j-1];
-            }
-            if j < width-1 && row_pair[1][j+1] == '^' {
-                new_timeline[j] += timeline[j+1];
-            }
-        }
-        timeline = new_timeline;
-    }
-
-    timeline.iter().sum()
+        .map(|position| match position {
+            Position::Space => 0,
+            Position::Splitter => 0,
+            Position::Beam(beam) => *beam,
+        })
+        .sum()
 }
 
 // =====================================================================
